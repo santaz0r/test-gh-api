@@ -90,6 +90,7 @@ async function onChange() {
   });
   loading.remove();
   wrapper.append(fragment);
+  if (!wrapper.childNodes.length) wrapper.textContent = "No repos was found";
 }
 
 chosenRepos.addEventListener("click", (e) => {
