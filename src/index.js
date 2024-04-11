@@ -11,9 +11,10 @@ const getRepos = async (url) => {
   try {
     const res = await fetch(url);
     const data = await res.json();
+
     return data;
   } catch (error) {
-    console.log(error);
+    throw new Error(error);
   }
 };
 
@@ -73,12 +74,20 @@ async function onChange() {
     return;
   }
   wrapper.replaceChildren();
-  const userValue = searchInput.value.trim();
+  const userValue = searchInput.value.toLowerCase().trim();
+
   wrapper.append(loading);
-  const { items } = await getRepos(myURL.replace("{{query}}", userValue));
+  const response = await getRepos(myURL.replace("{{query}}", userValue));
+
+  if (!response.items) {
+    wrapper.textContent = response.message.slice(0, 21);
+    return;
+  }
+  const { items: repositories } = response;
+  wrapper.replaceChildren();
   const fragment = document.createDocumentFragment();
 
-  const filteredArr = items
+  const filteredArr = repositories
     .filter((i) => i.name.toLowerCase().startsWith(userValue))
     .splice(0, 5);
   if (!filteredArr) return;
@@ -100,5 +109,5 @@ chosenRepos.addEventListener("click", (e) => {
   element.parentNode.remove();
 });
 
-onChange = debounce(onChange, 300);
+onChange = debounce(onChange, 200);
 searchInput.addEventListener("keyup", onChange);
